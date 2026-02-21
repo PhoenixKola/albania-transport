@@ -93,6 +93,7 @@ async function main() {
   const stopTimesRows = readCsvFromZip(zip, "stop_times.txt");
   const calendarRows = readCsvFromZip(zip, "calendar.txt");
   const calendarDatesRows = readCsvFromZip(zip, "calendar_dates.txt");
+  const shapesRows = readCsvFromZip(zip, "shapes.txt");
 
   const routes = routesRows
     .map((r: any) => ({
@@ -124,48 +125,74 @@ async function main() {
     .filter((t: any) => t.id && t.routeId && t.serviceId);
 
   const stopTimesByTrip: Record<string, any[]> = {};
+  const stopTimesByStop: Record<string, any[]> = {};
+
   for (const st of stopTimesRows) {
     const tripId = toStr(st.trip_id);
-    if (!tripId) continue;
-    const arr = (stopTimesByTrip[tripId] ||= []);
-    arr.push({
-      stopId: toStr(st.stop_id),
-      arrival: toTime(st.arrival_time),
-      departure: toTime(st.departure_time),
-      seq: Number(st.stop_sequence)
-    });
+    const stopId = toStr(st.stop_id);
+    const seq = Number(st.stop_sequence);
+
+    if (!tripId || !stopId || !Number.isFinite(seq)) continue;
+
+    const arrival = toTime(st.arrival_time);
+    const departure = toTime(st.departure_time);
+
+    (stopTimesByTrip[tripId] ||= []).push({ stopId, arrival, departure, seq });
+    (stopTimesByStop[stopId] ||= []).push({ tripId, arrival, departure, seq });
   }
+
   for (const k of Object.keys(stopTimesByTrip)) {
-    stopTimesByTrip[k] = stopTimesByTrip[k]
-      .filter(x => x.stopId && Number.isFinite(x.seq))
-      .sort((a, b) => a.seq - b.seq);
+    stopTimesByTrip[k] = stopTimesByTrip[k].sort((a, b) => a.seq - b.seq);
     if (!stopTimesByTrip[k].length) delete stopTimesByTrip[k];
   }
 
-  const routeTrips: Record<string, string[]> = {};
-  for (const t of trips) {
-    (routeTrips[t.routeId] ||= []).push(t.id);
+  for (const k of Object.keys(stopTimesByStop)) {
+    stopTimesByStop[k] = stopTimesByStop[k].sort((a, b) => a.seq - b.seq);
+    if (!stopTimesByStop[k].length) delete stopTimesByStop[k];
   }
 
+  const routeTrips: Record<string, string[]> = {};
+  for (const t of trips) (routeTrips[t.routeId] ||= []).push(t.id);
+
   const services = {
-    calendar: calendarRows.map((c: any) => ({
-      serviceId: toStr(c.service_id),
-      monday: toInt(c.monday) === 1,
-      tuesday: toInt(c.tuesday) === 1,
-      wednesday: toInt(c.wednesday) === 1,
-      thursday: toInt(c.thursday) === 1,
-      friday: toInt(c.friday) === 1,
-      saturday: toInt(c.saturday) === 1,
-      sunday: toInt(c.sunday) === 1,
-      startDate: toStr(c.start_date),
-      endDate: toStr(c.end_date)
-    })).filter((x: any) => x.serviceId),
-    calendarDates: calendarDatesRows.map((d: any) => ({
-      serviceId: toStr(d.service_id),
-      date: toStr(d.date),
-      exceptionType: toInt(d.exception_type)
-    })).filter((x: any) => x.serviceId && x.date && (x.exceptionType === 1 || x.exceptionType === 2))
+    calendar: calendarRows
+      .map((c: any) => ({
+        serviceId: toStr(c.service_id),
+        monday: toInt(c.monday) === 1,
+        tuesday: toInt(c.tuesday) === 1,
+        wednesday: toInt(c.wednesday) === 1,
+        thursday: toInt(c.thursday) === 1,
+        friday: toInt(c.friday) === 1,
+        saturday: toInt(c.saturday) === 1,
+        sunday: toInt(c.sunday) === 1,
+        startDate: toStr(c.start_date),
+        endDate: toStr(c.end_date)
+      }))
+      .filter((x: any) => x.serviceId),
+    calendarDates: calendarDatesRows
+      .map((d: any) => ({
+        serviceId: toStr(d.service_id),
+        date: toStr(d.date),
+        exceptionType: toInt(d.exception_type)
+      }))
+      .filter((x: any) => x.serviceId && x.date && (x.exceptionType === 1 || x.exceptionType === 2))
   };
+
+  const shapesById: Record<string, Array<[number, number]>> = {};
+  for (const s of shapesRows) {
+    const shapeId = toStr(s.shape_id);
+    const lat = Number(s.shape_pt_lat);
+    const lon = Number(s.shape_pt_lon);
+    const seq = Number(s.shape_pt_sequence);
+    if (!shapeId || !Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(seq)) continue;
+    (shapesById[shapeId] ||= []).push([seq, lat, lon] as any);
+  }
+  for (const k of Object.keys(shapesById)) {
+    const pts = shapesById[k] as any[];
+    pts.sort((a, b) => a[0] - b[0]);
+    shapesById[k] = pts.map(p => [p[1], p[2]]);
+    if (!shapesById[k].length) delete shapesById[k];
+  }
 
   routes.sort((a, b) => (a.shortName || a.longName).localeCompare(b.shortName || b.longName));
   stops.sort((a, b) => a.name.localeCompare(b.name));
@@ -174,8 +201,10 @@ async function main() {
   writeJson(path.join(DATA_DIR, "stops.json"), stops);
   writeJson(path.join(DATA_DIR, "trips.json"), trips);
   writeJson(path.join(DATA_DIR, "stop_times_by_trip.json"), stopTimesByTrip);
+  writeJson(path.join(DATA_DIR, "stop_times_by_stop.json"), stopTimesByStop);
   writeJson(path.join(DATA_DIR, "route_trips.json"), routeTrips);
   writeJson(path.join(DATA_DIR, "services.json"), services);
+  writeJson(path.join(DATA_DIR, "shapes.json"), shapesById);
 
   const now = new Date().toISOString();
 
@@ -188,14 +217,18 @@ async function main() {
       stops: "stops.json",
       trips: "trips.json",
       stopTimesByTrip: "stop_times_by_trip.json",
+      stopTimesByStop: "stop_times_by_stop.json",
       routeTrips: "route_trips.json",
-      services: "services.json"
+      services: "services.json",
+      shapes: "shapes.json"
     },
     counts: {
       routes: routes.length,
       stops: stops.length,
       trips: trips.length,
-      tripsWithStopTimes: Object.keys(stopTimesByTrip).length
+      tripsWithStopTimes: Object.keys(stopTimesByTrip).length,
+      stopsWithTimes: Object.keys(stopTimesByStop).length,
+      shapes: Object.keys(shapesById).length
     }
   };
 
@@ -205,8 +238,7 @@ async function main() {
   history.unshift({ updatedAt: now, hash, counts: latest.counts });
   writeJson(path.join(DATA_DIR, "history.json"), history.slice(0, 60));
 
-  console.log("Built feed:");
-  console.log(latest);
+  console.log("Built feed:", latest);
 }
 
 main().catch((e) => {

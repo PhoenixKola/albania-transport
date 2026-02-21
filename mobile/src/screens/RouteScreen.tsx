@@ -1,0 +1,115 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { readCachedJson } from "../feed/FeedService";
+import type { Route, RouteTrips, Stop, StopTimesByTrip, Trip } from "../types/feed";
+
+export default function RouteScreen({ route, navigation }: any) {
+  const routeId: string = route.params.routeId;
+
+  const [loading, setLoading] = useState(true);
+  const [r, setR] = useState<Route | null>(null);
+  const [stopsMap, setStopsMap] = useState<Record<string, Stop>>({});
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [stopIdsOrdered, setStopIdsOrdered] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const routes = await readCachedJson<Route[]>("routes.json");
+        const stops = await readCachedJson<Stop[]>("stops.json");
+        const trips = await readCachedJson<Trip[]>("trips.json");
+        const routeTrips = await readCachedJson<RouteTrips>("route_trips.json");
+        const stopTimesByTrip = await readCachedJson<StopTimesByTrip>("stop_times_by_trip.json");
+
+        const rr = routes.find(x => x.id === routeId) || null;
+        setR(rr);
+
+        const map: Record<string, Stop> = {};
+        for (const s of stops) map[s.id] = s;
+        setStopsMap(map);
+
+        const tripIds = routeTrips[routeId] || [];
+        if (!tripIds.length) {
+          setError("No trips found for this route.");
+          return;
+        }
+
+        const t = trips.find(x => x.id === tripIds[0]) || null;
+        setTrip(t);
+
+        const times = stopTimesByTrip[tripIds[0]] || [];
+        if (!times.length) {
+          setError("No stop times found for this route.");
+          return;
+        }
+
+        setStopIdsOrdered(times.map(x => x.stopId));
+      } catch (e: any) {
+        setError(e?.message || "Failed to load route.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [routeId]);
+
+  const title = useMemo(() => {
+    if (!r) return "Route";
+    const left = (r.shortName || "—").trim();
+    return r.longName ? `${left} • ${r.longName}` : left;
+  }, [r]);
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
+      <View style={{ padding: 16 }}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Text style={{ color: "rgba(255,255,255,0.7)" }}>← Back</Text>
+        </Pressable>
+
+        <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>{title}</Text>
+
+        {trip?.headsign ? (
+          <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>Headsign: {trip.headsign}</Text>
+        ) : null}
+
+        <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)" }}>Stops</Text>
+      </View>
+
+      {loading ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color="white" />
+        </View>
+      ) : error ? (
+        <View style={{ padding: 16 }}>
+          <Text style={{ color: "rgba(255,255,255,0.8)" }}>{error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          data={stopIdsOrdered}
+          keyExtractor={(id, idx) => `${id}-${idx}`}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          renderItem={({ item, index }) => {
+            const s = stopsMap[item];
+            return (
+              <Pressable
+                onPress={() => navigation.navigate("Stop", { stopId: item })}
+                style={{
+                  padding: 14,
+                  borderRadius: 16,
+                  backgroundColor: "rgba(255,255,255,0.08)",
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.12)"
+                }}
+              >
+                <Text style={{ color: "rgba(255,255,255,0.65)", marginBottom: 6 }}>Stop {index + 1}</Text>
+                <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>{s?.name || item}</Text>
+              </Pressable>
+            );
+          }}
+        />
+      )}
+    </SafeAreaView>
+  );
+}

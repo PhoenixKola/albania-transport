@@ -1,13 +1,19 @@
 {
-  "updatedAt": "",
-  "source": "",
-  "hash": "",
+  "updatedAt": "2026-02-21T15:36:35.376Z",
+  "source": "https://pt.tirana.al/gtfs/gtfs.zip",
+  "hash": "sha256:1ac40b61c70ee5cbe4135b3b754dce5328de7b7bb5065e29da31c029e3f5fac6",
   "files": {
     "routes": "routes.json",
-    "stops": "stops.json"
+    "stops": "stops.json",
+    "trips": "trips.json",
+    "stopTimesByTrip": "stop_times_by_trip.json",
+    "routeTrips": "route_trips.json",
+    "services": "services.json"
   },
   "counts": {
-    "routes": 0,
-    "stops": 0
+    "routes": 26,
+    "stops": 467,
+    "trips": 16560,
+    "tripsWithStopTimes": 16560
   }
 }

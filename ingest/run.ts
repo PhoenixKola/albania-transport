@@ -4,9 +4,7 @@ import crypto from "node:crypto";
 import AdmZip from "adm-zip";
 import { parse } from "csv-parse/sync";
 
-const GTFS_URL =
-  process.env.GTFS_URL?.trim() ||
-  "https://example.com/gtfs.zip";
+const GTFS_URL = "https://pt.tirana.al/gtfs/gtfs.zip";
 
 const ROOT = path.resolve(process.cwd(), "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -16,22 +14,8 @@ type Latest = {
   updatedAt: string;
   source: string;
   hash: string;
-  files: { routes: string; stops: string };
-  counts: { routes: number; stops: number };
-};
-
-type Route = {
-  id: string;
-  shortName: string;
-  longName: string;
-  type: number | null;
-};
-
-type Stop = {
-  id: string;
-  name: string;
-  lat: number;
-  lon: number;
+  files: Record<string, string>;
+  counts: Record<string, number>;
 };
 
 function ensureDir(p: string) {
@@ -49,17 +33,6 @@ async function download(url: string): Promise<Buffer> {
   return Buffer.from(arr);
 }
 
-function readCsvFromZip(zip: AdmZip, fileName: string): any[] {
-  const entry = zip.getEntry(fileName);
-  if (!entry) throw new Error(`Missing GTFS file: ${fileName}`);
-  const text = zip.readAsText(entry);
-  return parse(text, { columns: true, skip_empty_lines: true, bom: true });
-}
-
-function writeJson(filePath: string, data: unknown) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
-}
-
 function readJson<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) return fallback;
   try {
@@ -69,12 +42,45 @@ function readJson<T>(filePath: string, fallback: T): T {
   }
 }
 
+function writeJson(filePath: string, data: unknown) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+}
+
+function readCsvFromZip(zip: AdmZip, fileName: string): any[] {
+  const entry = zip.getEntry(fileName);
+  if (!entry) return [];
+  const text = zip.readAsText(entry);
+  return parse(text, { columns: true, skip_empty_lines: true, bom: true });
+}
+
+function toInt(v: any) {
+  if (v === undefined || v === null || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function toStr(v: any) {
+  if (v === undefined || v === null) return "";
+  return String(v);
+}
+
+function toTime(v: any) {
+  const s = toStr(v).trim();
+  return s || null;
+}
+
 async function main() {
   ensureDir(DATA_DIR);
   ensureDir(TMP_DIR);
 
   const zipBuf = await download(GTFS_URL);
   const hash = `sha256:${sha256(zipBuf)}`;
+
+  const prevLatest = readJson<Latest | null>(path.join(DATA_DIR, "latest.json"), null);
+  if (prevLatest?.hash === hash) {
+    console.log("No change in gtfs.zip hash. Exiting.");
+    return;
+  }
 
   const zipPath = path.join(TMP_DIR, "gtfs.zip");
   fs.writeFileSync(zipPath, zipBuf);
@@ -83,30 +89,93 @@ async function main() {
 
   const routesRows = readCsvFromZip(zip, "routes.txt");
   const stopsRows = readCsvFromZip(zip, "stops.txt");
+  const tripsRows = readCsvFromZip(zip, "trips.txt");
+  const stopTimesRows = readCsvFromZip(zip, "stop_times.txt");
+  const calendarRows = readCsvFromZip(zip, "calendar.txt");
+  const calendarDatesRows = readCsvFromZip(zip, "calendar_dates.txt");
 
-  const routes: Route[] = routesRows.map((r: any) => ({
-    id: String(r.route_id ?? ""),
-    shortName: String(r.route_short_name ?? ""),
-    longName: String(r.route_long_name ?? ""),
-    type: r.route_type !== undefined && r.route_type !== "" ? Number(r.route_type) : null
-  }))
-  .filter(r => r.id);
+  const routes = routesRows
+    .map((r: any) => ({
+      id: toStr(r.route_id),
+      shortName: toStr(r.route_short_name),
+      longName: toStr(r.route_long_name),
+      type: toInt(r.route_type)
+    }))
+    .filter((r: any) => r.id);
 
-  const stops: Stop[] = stopsRows.map((s: any) => ({
-    id: String(s.stop_id ?? ""),
-    name: String(s.stop_name ?? ""),
-    lat: Number(s.stop_lat),
-    lon: Number(s.stop_lon)
-  }))
-  .filter(s => s.id && Number.isFinite(s.lat) && Number.isFinite(s.lon));
+  const stops = stopsRows
+    .map((s: any) => ({
+      id: toStr(s.stop_id),
+      name: toStr(s.stop_name),
+      lat: Number(s.stop_lat),
+      lon: Number(s.stop_lon)
+    }))
+    .filter((s: any) => s.id && Number.isFinite(s.lat) && Number.isFinite(s.lon));
+
+  const trips = tripsRows
+    .map((t: any) => ({
+      id: toStr(t.trip_id),
+      routeId: toStr(t.route_id),
+      serviceId: toStr(t.service_id),
+      headsign: toStr(t.trip_headsign),
+      directionId: toInt(t.direction_id),
+      shapeId: toStr(t.shape_id)
+    }))
+    .filter((t: any) => t.id && t.routeId && t.serviceId);
+
+  const stopTimesByTrip: Record<string, any[]> = {};
+  for (const st of stopTimesRows) {
+    const tripId = toStr(st.trip_id);
+    if (!tripId) continue;
+    const arr = (stopTimesByTrip[tripId] ||= []);
+    arr.push({
+      stopId: toStr(st.stop_id),
+      arrival: toTime(st.arrival_time),
+      departure: toTime(st.departure_time),
+      seq: Number(st.stop_sequence)
+    });
+  }
+  for (const k of Object.keys(stopTimesByTrip)) {
+    stopTimesByTrip[k] = stopTimesByTrip[k]
+      .filter(x => x.stopId && Number.isFinite(x.seq))
+      .sort((a, b) => a.seq - b.seq);
+    if (!stopTimesByTrip[k].length) delete stopTimesByTrip[k];
+  }
+
+  const routeTrips: Record<string, string[]> = {};
+  for (const t of trips) {
+    (routeTrips[t.routeId] ||= []).push(t.id);
+  }
+
+  const services = {
+    calendar: calendarRows.map((c: any) => ({
+      serviceId: toStr(c.service_id),
+      monday: toInt(c.monday) === 1,
+      tuesday: toInt(c.tuesday) === 1,
+      wednesday: toInt(c.wednesday) === 1,
+      thursday: toInt(c.thursday) === 1,
+      friday: toInt(c.friday) === 1,
+      saturday: toInt(c.saturday) === 1,
+      sunday: toInt(c.sunday) === 1,
+      startDate: toStr(c.start_date),
+      endDate: toStr(c.end_date)
+    })).filter((x: any) => x.serviceId),
+    calendarDates: calendarDatesRows.map((d: any) => ({
+      serviceId: toStr(d.service_id),
+      date: toStr(d.date),
+      exceptionType: toInt(d.exception_type)
+    })).filter((x: any) => x.serviceId && x.date && (x.exceptionType === 1 || x.exceptionType === 2))
+  };
 
   routes.sort((a, b) => (a.shortName || a.longName).localeCompare(b.shortName || b.longName));
   stops.sort((a, b) => a.name.localeCompare(b.name));
 
-  const routesFile = path.join(DATA_DIR, "routes.json");
-  const stopsFile = path.join(DATA_DIR, "stops.json");
-  writeJson(routesFile, routes);
-  writeJson(stopsFile, stops);
+  writeJson(path.join(DATA_DIR, "routes.json"), routes);
+  writeJson(path.join(DATA_DIR, "stops.json"), stops);
+  writeJson(path.join(DATA_DIR, "trips.json"), trips);
+  writeJson(path.join(DATA_DIR, "stop_times_by_trip.json"), stopTimesByTrip);
+  writeJson(path.join(DATA_DIR, "route_trips.json"), routeTrips);
+  writeJson(path.join(DATA_DIR, "services.json"), services);
 
   const now = new Date().toISOString();
 
@@ -114,8 +183,20 @@ async function main() {
     updatedAt: now,
     source: GTFS_URL,
     hash,
-    files: { routes: "routes.json", stops: "stops.json" },
-    counts: { routes: routes.length, stops: stops.length }
+    files: {
+      routes: "routes.json",
+      stops: "stops.json",
+      trips: "trips.json",
+      stopTimesByTrip: "stop_times_by_trip.json",
+      routeTrips: "route_trips.json",
+      services: "services.json"
+    },
+    counts: {
+      routes: routes.length,
+      stops: stops.length,
+      trips: trips.length,
+      tripsWithStopTimes: Object.keys(stopTimesByTrip).length
+    }
   };
 
   writeJson(path.join(DATA_DIR, "latest.json"), latest);
@@ -124,10 +205,8 @@ async function main() {
   history.unshift({ updatedAt: now, hash, counts: latest.counts });
   writeJson(path.join(DATA_DIR, "history.json"), history.slice(0, 60));
 
-  console.log("Done:");
-  console.log(`- routes: ${routes.length}`);
-  console.log(`- stops: ${stops.length}`);
-  console.log(`- latest hash: ${hash}`);
+  console.log("Built feed:");
+  console.log(latest);
 }
 
 main().catch((e) => {

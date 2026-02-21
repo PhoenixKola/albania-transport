@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native
 import { SafeAreaView } from "react-native-safe-area-context";
 import { readCachedJson } from "../feed/FeedService";
 import type { Route, RouteTrips, Stop, StopTimesByTrip, Trip } from "../types/feed";
+import { getFavorites, toggleFavoriteRoute } from "../storage/favorites";
 
 export default function RouteScreen({ route, navigation }: any) {
   const routeId: string = route.params.routeId;
@@ -13,6 +14,14 @@ export default function RouteScreen({ route, navigation }: any) {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [stopIdsOrdered, setStopIdsOrdered] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const f = await getFavorites();
+      setIsFav(f.routes.includes(routeId));
+    })();
+  }, [routeId]);
 
   useEffect(() => {
     (async () => {
@@ -69,8 +78,27 @@ export default function RouteScreen({ route, navigation }: any) {
 
         <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>{title}</Text>
 
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
+          <Pressable
+            onPress={async () => {
+              const next = await toggleFavoriteRoute(routeId);
+              setIsFav(next.routes.includes(routeId));
+            }}
+            style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
+          >
+            <Text style={{ color: "white", fontWeight: "700" }}>{isFav ? "★ Favorited" : "☆ Favorite"}</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.navigate("RouteMap", { routeId })}
+            style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(59,130,246,0.9)" }}
+          >
+            <Text style={{ color: "white", fontWeight: "700" }}>Map</Text>
+          </Pressable>
+        </View>
+
         {trip?.headsign ? (
-          <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>Headsign: {trip.headsign}</Text>
+          <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)" }}>Headsign: {trip.headsign}</Text>
         ) : null}
 
         <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)" }}>Stops</Text>
@@ -95,13 +123,7 @@ export default function RouteScreen({ route, navigation }: any) {
             return (
               <Pressable
                 onPress={() => navigation.navigate("Stop", { stopId: item })}
-                style={{
-                  padding: 14,
-                  borderRadius: 16,
-                  backgroundColor: "rgba(255,255,255,0.08)",
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.12)"
-                }}
+                style={{ padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
               >
                 <Text style={{ color: "rgba(255,255,255,0.65)", marginBottom: 6 }}>Stop {index + 1}</Text>
                 <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>{s?.name || item}</Text>

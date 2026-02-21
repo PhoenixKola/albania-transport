@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { readCachedJson } from "../feed/FeedService";
 import type { Route, Services, Stop, StopTimesByStop, Trip } from "../types/feed";
 import { isServiceActiveOnDate, minutesToLabel, upcomingOccurrencesForTime } from "../utils/schedule";
+import { getFavorites, toggleFavoriteStop } from "../storage/favorites";
 
 type DepartureRow = {
   label: string;
@@ -20,6 +21,14 @@ export default function StopScreen({ route, navigation }: any) {
   const [stop, setStop] = useState<Stop | null>(null);
   const [rows, setRows] = useState<DepartureRow[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const f = await getFavorites();
+      setIsFav(f.stops.includes(stopId));
+    })();
+  }, [stopId]);
 
   useEffect(() => {
     (async () => {
@@ -62,7 +71,6 @@ export default function StopScreen({ route, navigation }: any) {
           const departureMins = occ.minutes;
           const nowMins = now.getHours() * 60 + now.getMinutes();
           const diff = occ.dayOffset === 0 ? departureMins - nowMins : (24 * 60 - nowMins) + (departureMins % (24 * 60));
-
           if (diff < 0) continue;
 
           const label = minutesToLabel(departureMins);
@@ -78,7 +86,6 @@ export default function StopScreen({ route, navigation }: any) {
         }
 
         out.sort((a, b) => a.inMinutes - b.inMinutes);
-
         setRows(out.slice(0, 12));
       } catch (e: any) {
         setError(e?.message || "Failed to load stop.");
@@ -98,7 +105,20 @@ export default function StopScreen({ route, navigation }: any) {
         </Pressable>
 
         <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>{title}</Text>
-        <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>Next departures (scheduled)</Text>
+
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
+          <Pressable
+            onPress={async () => {
+              const next = await toggleFavoriteStop(stopId);
+              setIsFav(next.stops.includes(stopId));
+            }}
+            style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
+          >
+            <Text style={{ color: "white", fontWeight: "700" }}>{isFav ? "★ Favorited" : "☆ Favorite"}</Text>
+          </Pressable>
+        </View>
+
+        <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)" }}>Next departures (scheduled)</Text>
       </View>
 
       {loading ? (
@@ -116,22 +136,12 @@ export default function StopScreen({ route, navigation }: any) {
           keyExtractor={(x) => `${x.tripId}-${x.label}`}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           renderItem={({ item }) => (
-            <View
-              style={{
-                padding: 14,
-                borderRadius: 16,
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.12)"
-              }}
-            >
+            <View style={{ padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
                 <Text style={{ color: "white", fontSize: 18, fontWeight: "800" }}>{item.label}</Text>
                 <Text style={{ color: "rgba(255,255,255,0.75)" }}>{item.inMinutes} min</Text>
               </View>
-              {item.headsign ? (
-                <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>{item.headsign}</Text>
-              ) : null}
+              {item.headsign ? <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>{item.headsign}</Text> : null}
             </View>
           )}
         />

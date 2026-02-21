@@ -77,9 +77,28 @@ async function main() {
   const hash = `sha256:${sha256(zipBuf)}`;
 
   const prevLatest = readJson<Latest | null>(path.join(DATA_DIR, "latest.json"), null);
-  if (prevLatest?.hash === hash) {
-    console.log("No change in gtfs.zip hash. Exiting.");
+
+  const requiredOutputs = [
+    "latest.json",
+    "routes.json",
+    "stops.json",
+    "trips.json",
+    "stop_times_by_trip.json",
+    "stop_times_by_stop.json",
+    "route_trips.json",
+    "services.json",
+    "shapes.json"
+  ];
+
+  const missingOutputs = requiredOutputs.filter((f) => !fs.existsSync(path.join(DATA_DIR, f)));
+
+  if (prevLatest?.hash === hash && missingOutputs.length === 0) {
+    console.log("No change in gtfs.zip hash and all outputs exist. Exiting.");
     return;
+  }
+
+  if (prevLatest?.hash === hash && missingOutputs.length > 0) {
+    console.log("GTFS unchanged but outputs missing, regenerating:", missingOutputs.join(", "));
   }
 
   const zipPath = path.join(TMP_DIR, "gtfs.zip");

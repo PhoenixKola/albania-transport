@@ -3,9 +3,13 @@ import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import RoutesScreen from "./src/screens/RoutesScreen";
 import RouteScreen from "./src/screens/RouteScreen";
 import StopScreen from "./src/screens/StopScreen";
+import FavoritesScreen from "./src/screens/FavoritesScreen";
+import NearbyStopsScreen from "./src/screens/NearbyStopsScreen";
+import RouteMapScreen from "./src/screens/RouteMapScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +22,9 @@ export default function App() {
           <Stack.Screen name="Routes" component={RoutesScreen} />
           <Stack.Screen name="Route" component={RouteScreen} />
           <Stack.Screen name="Stop" component={StopScreen} />
+          <Stack.Screen name="Favorites" component={FavoritesScreen} />
+          <Stack.Screen name="Nearby" component={NearbyStopsScreen} />
+          <Stack.Screen name="RouteMap" component={RouteMapScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

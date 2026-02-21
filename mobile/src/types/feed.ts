@@ -58,3 +58,5 @@ export type Services = {
     exceptionType: number | null;
   }>;
 };
+
+export type ShapesById = Record<string, Array<[number, number]>>;

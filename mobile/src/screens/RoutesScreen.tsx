@@ -7,7 +7,7 @@ import type { Route } from "../types/feed";
 export default function RoutesScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [status, setStatus] = useState("Loading…");
+  const [status, setStatus] = useState<string>("Syncing feed…");
   const [routes, setRoutes] = useState<Route[]>([]);
   const [q, setQ] = useState("");
 
@@ -15,14 +15,8 @@ export default function RoutesScreen({ navigation }: any) {
     setSyncing(true);
     try {
       const { latest, updated } = await syncFeed();
-      setStatus(
-        updated
-          ? `Updated • ${new Date(latest.updatedAt).toLocaleString()}`
-          : `Up to date • ${new Date(latest.updatedAt).toLocaleString()}`
-      );
-
-      const routesData = await readCachedJson<Route[]>("routes.json");
-      setRoutes(routesData);
+      setStatus(updated ? `Updated • ${new Date(latest.updatedAt).toLocaleString()}` : `Up to date • ${new Date(latest.updatedAt).toLocaleString()}`);
+      setRoutes(await readCachedJson<Route[]>("routes.json"));
     } catch (e: any) {
       setStatus(e?.message || "Failed to load feed");
     } finally {
@@ -38,47 +32,34 @@ export default function RoutesScreen({ navigation }: any) {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return routes;
-    return routes.filter((r) => `${r.shortName} ${r.longName}`.toLowerCase().includes(s));
+    return routes.filter(r => `${r.shortName} ${r.longName}`.toLowerCase().includes(s));
   }, [routes, q]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
       <View style={{ padding: 16 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <View>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <View style={{ flex: 1, paddingRight: 10 }}>
             <Text style={{ color: "white", fontSize: 24, fontWeight: "800" }}>Tirana Transport</Text>
             <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.7)" }}>{status}</Text>
+
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
+              <Pressable onPress={() => navigation.navigate("Nearby")} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
+                <Text style={{ color: "white", fontWeight: "700" }}>Nearby</Text>
+              </Pressable>
+              <Pressable onPress={() => navigation.navigate("Favorites")} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
+                <Text style={{ color: "white", fontWeight: "700" }}>Favorites</Text>
+              </Pressable>
+            </View>
           </View>
 
-          <Pressable
-            onPress={load}
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              borderRadius: 12,
-              backgroundColor: "rgba(59,130,246,0.9)"
-            }}
-          >
+          <Pressable onPress={load} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(59,130,246,0.9)" }}>
             <Text style={{ color: "white", fontWeight: "700" }}>{syncing ? "…" : "Refresh"}</Text>
           </Pressable>
         </View>
 
-        <View
-          style={{
-            marginTop: 14,
-            backgroundColor: "rgba(255,255,255,0.08)",
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: "rgba(255,255,255,0.12)"
-          }}
-        >
-          <TextInput
-            value={q}
-            onChangeText={setQ}
-            placeholder="Search routes…"
-            placeholderTextColor="rgba(255,255,255,0.45)"
-            style={{ paddingHorizontal: 14, paddingVertical: 12, color: "white", fontSize: 16 }}
-          />
+        <View style={{ marginTop: 14, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
+          <TextInput value={q} onChangeText={setQ} placeholder="Search routes…" placeholderTextColor="rgba(255,255,255,0.45)" style={{ paddingHorizontal: 14, paddingVertical: 12, color: "white", fontSize: 16 }} />
         </View>
       </View>
 
@@ -95,13 +76,7 @@ export default function RoutesScreen({ navigation }: any) {
           renderItem={({ item }) => (
             <Pressable
               onPress={() => navigation.navigate("Route", { routeId: item.id })}
-              style={{
-                padding: 14,
-                borderRadius: 16,
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.12)"
-              }}
+              style={{ padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
             >
               <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>
                 {(item.shortName || "—").trim()}

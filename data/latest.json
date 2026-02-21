@@ -1,0 +1,13 @@
+{
+  "updatedAt": "",
+  "source": "",
+  "hash": "",
+  "files": {
+    "routes": "routes.json",
+    "stops": "stops.json"
+  },
+  "counts": {
+    "routes": 0,
+    "stops": 0
+  }
+}

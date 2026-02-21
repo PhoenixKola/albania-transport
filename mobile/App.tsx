@@ -5,6 +5,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import RoutesScreen from "./src/screens/RoutesScreen";
+import StopsScreen from "./src/screens/StopsScreen";
+import SearchScreen from "./src/screens/SearchScreen";
 import RouteScreen from "./src/screens/RouteScreen";
 import StopScreen from "./src/screens/StopScreen";
 import FavoritesScreen from "./src/screens/FavoritesScreen";
@@ -20,6 +22,8 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Routes" component={RoutesScreen} />
+          <Stack.Screen name="Stops" component={StopsScreen} />
+          <Stack.Screen name="Search" component={SearchScreen} />
           <Stack.Screen name="Route" component={RouteScreen} />
           <Stack.Screen name="Stop" component={StopScreen} />
           <Stack.Screen name="Favorites" component={FavoritesScreen} />

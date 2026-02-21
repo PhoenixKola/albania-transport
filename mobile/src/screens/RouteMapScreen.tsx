@@ -4,8 +4,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { readCachedJson } from "../feed/FeedService";
 import type { Route, RouteTrips, ShapesById, Stop, StopTimesByTrip, Trip } from "../types/feed";
+import { useLang } from "../hooks/useLang";
+import { I18N } from "../i18n";
 
 export default function RouteMapScreen({ route, navigation }: any) {
+  const { lang } = useLang();
+  const t = I18N[lang];
+
   const routeId: string = route.params.routeId;
 
   const [loading, setLoading] = useState(true);
@@ -24,51 +29,56 @@ export default function RouteMapScreen({ route, navigation }: any) {
         const stops = await readCachedJson<Stop[]>("stops.json");
         const shapes = await readCachedJson<ShapesById>("shapes.json");
 
-        setR(routes.find(x => x.id === routeId) || null);
+        setR(routes.find((x) => x.id === routeId) || null);
 
         const tripIds = routeTrips[routeId] || [];
         if (!tripIds.length) {
-          setErr("No trips for this route.");
+          setErr(lang === "sq" ? "S’ka udhëtime për këtë linjë." : "No trips for this route.");
           return;
         }
-        const trip = trips.find(t => t.id === tripIds[0]) || null;
-        if (!trip || !trip.shapeId) {
-          setErr("No shape for this route.");
+        const trip = trips.find((tt) => tt.id === tripIds[0]) || null;
+        if (!trip) {
+          setErr(lang === "sq" ? "Udhëtimi mungon për këtë linjë." : "Trip missing for this route.");
           return;
         }
 
-        const pts = shapes[trip.shapeId] || [];
+        const stopsMap: Record<string, Stop> = {};
+        for (const s of stops) stopsMap[s.id] = s;
+
+        const times = stopTimesByTrip[tripIds[0]] || [];
+        const stopIds = times.map((x) => x.stopId);
+        const ms = stopIds
+          .map((id) => stopsMap[id])
+          .filter(Boolean)
+          .map((s) => ({ id: s.id, name: s.name, lat: s.lat, lon: s.lon }));
+        setMarkers(ms);
+
+        let pts: Array<[number, number]> = [];
+        if (trip.shapeId && shapes[trip.shapeId] && shapes[trip.shapeId].length) {
+          pts = shapes[trip.shapeId];
+        } else {
+          pts = ms.map((m) => [m.lat, m.lon]);
+        }
+
         if (!pts.length) {
-          setErr("Shape points missing.");
+          setErr(lang === "sq" ? "Nuk ka të dhëna harte për këtë linjë." : "No map data for this route.");
           return;
         }
 
         setPoly(pts.map(([lat, lon]) => ({ latitude: lat, longitude: lon })));
-
-        const stopsMap: Record<string, Stop> = {};
-        for (const s of stops) stopsMap[s.id] = s;
-        const times = stopTimesByTrip[tripIds[0]] || [];
-        const stopIds = times.map(x => x.stopId);
-
-        const ms = stopIds
-          .map(id => stopsMap[id])
-          .filter(Boolean)
-          .map(s => ({ id: s.id, name: s.name, lat: s.lat, lon: s.lon }));
-
-        setMarkers(ms);
       } catch (e: any) {
-        setErr(e?.message || "Failed to load map.");
+        setErr(e?.message || (lang === "sq" ? "Dështoi ngarkimi i hartës." : "Failed to load map."));
       } finally {
         setLoading(false);
       }
     })();
-  }, [routeId]);
+  }, [routeId, lang]);
 
   const title = useMemo(() => {
-    if (!r) return "Map";
+    if (!r) return t.map;
     const left = (r.shortName || "—").trim();
     return r.longName ? `${left} • ${r.longName}` : left;
-  }, [r]);
+  }, [r, t.map]);
 
   const initial = poly[0] || { latitude: 41.3275, longitude: 19.8187 };
 
@@ -76,7 +86,7 @@ export default function RouteMapScreen({ route, navigation }: any) {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
       <View style={{ padding: 16 }}>
         <Pressable onPress={() => navigation.goBack()}>
-          <Text style={{ color: "rgba(255,255,255,0.7)" }}>← Back</Text>
+          <Text style={{ color: "rgba(255,255,255,0.7)" }}>{t.back}</Text>
         </Pressable>
         <Text style={{ marginTop: 10, color: "white", fontSize: 18, fontWeight: "800" }}>{title}</Text>
       </View>
@@ -90,9 +100,9 @@ export default function RouteMapScreen({ route, navigation }: any) {
           <Text style={{ color: "rgba(255,255,255,0.8)" }}>{err}</Text>
         </View>
       ) : (
-        <MapView style={{ flex: 1 }} initialRegion={{ ...initial, latitudeDelta: 0.05, longitudeDelta: 0.05 }}>
+        <MapView style={{ flex: 1 }} initialRegion={{ ...initial, latitudeDelta: 0.06, longitudeDelta: 0.06 }}>
           <Polyline coordinates={poly} strokeWidth={4} />
-          {markers.map(m => (
+          {markers.map((m) => (
             <Marker key={m.id} coordinate={{ latitude: m.lat, longitude: m.lon }} title={m.name} />
           ))}
         </MapView>

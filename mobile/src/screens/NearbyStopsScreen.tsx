@@ -5,8 +5,13 @@ import * as Location from "expo-location";
 import { readCachedJson } from "../feed/FeedService";
 import type { Stop } from "../types/feed";
 import { haversineMeters } from "../utils/geo";
+import { useLang } from "../hooks/useLang";
+import { I18N } from "../i18n";
 
 export default function NearbyStopsScreen({ navigation }: any) {
+  const { lang } = useLang();
+  const t = I18N[lang];
+
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [me, setMe] = useState<{ lat: number; lon: number } | null>(null);
@@ -17,7 +22,7 @@ export default function NearbyStopsScreen({ navigation }: any) {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          setErr("Location permission denied.");
+          setErr(t.locationDenied);
           return;
         }
         const pos = await Location.getCurrentPositionAsync({});
@@ -29,15 +34,12 @@ export default function NearbyStopsScreen({ navigation }: any) {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [t.locationDenied]);
 
   const nearby = useMemo(() => {
     if (!me) return [];
     return stops
-      .map(s => ({
-        s,
-        d: haversineMeters(me.lat, me.lon, s.lat, s.lon)
-      }))
+      .map(s => ({ s, d: haversineMeters(me.lat, me.lon, s.lat, s.lon) }))
       .sort((a, b) => a.d - b.d)
       .slice(0, 30);
   }, [me, stops]);
@@ -46,15 +48,16 @@ export default function NearbyStopsScreen({ navigation }: any) {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
       <View style={{ padding: 16 }}>
         <Pressable onPress={() => navigation.goBack()}>
-          <Text style={{ color: "rgba(255,255,255,0.7)" }}>← Back</Text>
+          <Text style={{ color: "rgba(255,255,255,0.7)" }}>{t.back}</Text>
         </Pressable>
-        <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>Nearby Stops</Text>
-        <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>Closest stops around you</Text>
+        <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>{t.nearby}</Text>
+        <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>{t.closestStops}</Text>
       </View>
 
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <ActivityIndicator size="large" color="white" />
+          <Text style={{ marginTop: 12, color: "rgba(255,255,255,0.7)" }}>{t.loading}</Text>
         </View>
       ) : err ? (
         <View style={{ padding: 16 }}>

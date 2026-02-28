@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+
 import { readCachedJson, syncFeed } from "../feed/FeedService";
 import type { Route } from "../types/feed";
 import { getFavorites } from "../storage/favorites";
@@ -8,13 +10,19 @@ import { getLang, toggleLang } from "../storage/prefs";
 import type { Lang } from "../i18n";
 import { I18N } from "../i18n";
 
+import { UI } from "../ui/ui";
+import { TopBar, ListItem, EmptyState, SearchInput } from "../ui/components";
+import { AnimatedPressable } from "../ui/ui";
+
 export default function RoutesScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
+
   const [lang, setLang] = useState<Lang>("en");
   const t = I18N[lang];
 
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [status, setStatus] = useState<string>("Syncing…");
+  const [status, setStatus] = useState<string>("");
   const [mode, setMode] = useState<"online" | "offline">("online");
   const [routes, setRoutes] = useState<Route[]>([]);
   const [favRouteIds, setFavRouteIds] = useState<string[]>([]);
@@ -34,9 +42,13 @@ export default function RoutesScreen({ navigation }: any) {
 
       const routesData = await readCachedJson<Route[]>("routes.json");
       setRoutes(routesData);
-    } catch (e: any) {
+    } catch {
       setMode("offline");
       setStatus(t.offlineMode);
+      const f = await getFavorites();
+      setFavRouteIds(f.routes);
+      const routesData = await readCachedJson<Route[]>("routes.json");
+      setRoutes(routesData);
     } finally {
       setSyncing(false);
       setLoading(false);
@@ -52,78 +64,177 @@ export default function RoutesScreen({ navigation }: any) {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const list = s ? routes.filter(r => `${r.shortName} ${r.longName}`.toLowerCase().includes(s)) : routes;
+    const list = s ? routes.filter((r) => `${r.shortName} ${r.longName}`.toLowerCase().includes(s)) : routes;
 
     const favSet = new Set(favRouteIds);
-    const fav = list.filter(r => favSet.has(r.id));
-    const rest = list.filter(r => !favSet.has(r.id));
+    const fav = list.filter((r) => favSet.has(r.id));
+    const rest = list.filter((r) => !favSet.has(r.id));
     return [...fav, ...rest];
   }, [routes, q, favRouteIds]);
 
+  const headerRight = (
+    <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+      <AnimatedPressable
+        onPress={async () => {
+          const next = await toggleLang();
+          setLang(next);
+        }}
+        style={{}}
+        contentStyle={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          paddingVertical: 10,
+          paddingHorizontal: 12,
+          borderRadius: 16,
+          backgroundColor: UI.card2,
+          borderWidth: 1,
+          borderColor: UI.border
+        }}
+        scaleIn={0.98}
+      >
+        <Ionicons name="globe-outline" size={16} color={UI.text} />
+        <Text style={{ color: UI.text, fontWeight: "900" }}>{lang.toUpperCase()}</Text>
+      </AnimatedPressable>
+
+      <AnimatedPressable
+        onPress={load}
+        disabled={syncing}
+        style={{ opacity: syncing ? 0.7 : 1 }}
+        contentStyle={{
+          width: 44,
+          height: 44,
+          borderRadius: 16,
+          backgroundColor: UI.accent,
+          alignItems: "center",
+          justifyContent: "center"
+        }}
+        scaleIn={0.98}
+      >
+        {syncing ? <ActivityIndicator color="#fff" /> : <Ionicons name="refresh" size={18} color="#fff" />}
+      </AnimatedPressable>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
-      <View style={{ padding: 16 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text style={{ color: "white", fontSize: 24, fontWeight: "800" }}>{t.appTitle}</Text>
-            <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.7)" }}>
-              {mode === "offline" ? t.offlineMode : status}
-            </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: UI.bg0 }} edges={["top", "left", "right"]}>
+      <View style={{ paddingTop: insets.top }}>
+        <TopBar
+          title={t.appTitle}
+          subtitle={mode === "offline" ? t.offlineMode : status || t.loading}
+          // leftLabel=""
+          // onBack={undefined}
+          right={headerRight}
+        />
 
-            <View style={{ flexDirection: "row", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-              <Pressable onPress={() => navigation.navigate("Search")} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(59,130,246,0.9)" }}>
-                <Text style={{ color: "white", fontWeight: "700" }}>{t.search}</Text>
-              </Pressable>
+        <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+          <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+            <AnimatedPressable
+              onPress={() => navigation.navigate("Search")}
+              style={{}}
+              contentStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 16,
+                backgroundColor: UI.accent
+              }}
+              scaleIn={0.98}
+            >
+              <Ionicons name="search" size={16} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "900" }}>{t.search}</Text>
+            </AnimatedPressable>
 
-              <Pressable onPress={() => navigation.navigate("Stops", { lang })} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
-                <Text style={{ color: "white", fontWeight: "700" }}>{t.stops}</Text>
-              </Pressable>
+            <AnimatedPressable
+              onPress={() => navigation.navigate("Stops", { lang })}
+              style={{}}
+              contentStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 16,
+                backgroundColor: UI.card2,
+                borderWidth: 1,
+                borderColor: UI.border
+              }}
+              scaleIn={0.98}
+            >
+              <Ionicons name="list" size={16} color={UI.text} />
+              <Text style={{ color: UI.text, fontWeight: "900" }}>{t.stops}</Text>
+            </AnimatedPressable>
 
-              <Pressable onPress={() => navigation.navigate("Nearby")} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
-                <Text style={{ color: "white", fontWeight: "700" }}>{t.nearby}</Text>
-              </Pressable>
+            <AnimatedPressable
+              onPress={() => navigation.navigate("Nearby")}
+              style={{}}
+              contentStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 16,
+                backgroundColor: UI.card2,
+                borderWidth: 1,
+                borderColor: UI.border
+              }}
+              scaleIn={0.98}
+            >
+              <Ionicons name="navigate" size={16} color={UI.text} />
+              <Text style={{ color: UI.text, fontWeight: "900" }}>{t.nearby}</Text>
+            </AnimatedPressable>
 
-              <Pressable onPress={() => navigation.navigate("Favorites")} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
-                <Text style={{ color: "white", fontWeight: "700" }}>{t.favorites}</Text>
-              </Pressable>
+            <AnimatedPressable
+              onPress={() => navigation.navigate("Favorites")}
+              style={{}}
+              contentStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 16,
+                backgroundColor: UI.card2,
+                borderWidth: 1,
+                borderColor: UI.border
+              }}
+              scaleIn={0.98}
+            >
+              <Ionicons name="star" size={16} color={UI.text} />
+              <Text style={{ color: UI.text, fontWeight: "900" }}>{t.favorites}</Text>
+            </AnimatedPressable>
+          </View>
 
-              <Pressable
-                onPress={async () => {
-                  const next = await toggleLang();
-                  setLang(next);
-                }}
-                style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
-              >
-                <Text style={{ color: "white", fontWeight: "800" }}>{lang.toUpperCase()}</Text>
-              </Pressable>
+          <SearchInput value={q} onChangeText={setQ} placeholder={t.searchRoutes} />
+
+          {mode === "offline" ? (
+            <View
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderRadius: 18,
+                backgroundColor: UI.warnSoft,
+                borderWidth: 1,
+                borderColor: UI.warnBorder,
+                flexDirection: "row",
+                gap: 10,
+                alignItems: "center"
+              }}
+            >
+              <Ionicons name="cloud-offline-outline" size={18} color="rgba(255,255,255,0.9)" />
+              <Text style={{ color: "rgba(255,255,255,0.9)", fontWeight: "900" }}>{t.offlineMode}</Text>
             </View>
-          </View>
-
-          <Pressable onPress={load} style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.10)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
-            <Text style={{ color: "white", fontWeight: "700" }}>{syncing ? "…" : t.refresh}</Text>
-          </Pressable>
+          ) : null}
         </View>
-
-        <View style={{ marginTop: 14, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
-          <TextInput
-            value={q}
-            onChangeText={setQ}
-            placeholder={t.searchRoutes}
-            placeholderTextColor="rgba(255,255,255,0.45)"
-            style={{ paddingHorizontal: 14, paddingVertical: 12, color: "white", fontSize: 16 }}
-          />
-        </View>
-
-        {mode === "offline" ? (
-          <View style={{ marginTop: 12, padding: 12, borderRadius: 14, backgroundColor: "rgba(245,158,11,0.15)", borderWidth: 1, borderColor: "rgba(245,158,11,0.35)" }}>
-            <Text style={{ color: "rgba(255,255,255,0.9)", fontWeight: "700" }}>{t.offlineMode}</Text>
-          </View>
-        ) : null}
       </View>
 
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator size="large" color="white" />
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={{ marginTop: 12, color: UI.muted, fontWeight: "800" }}>{t.loading}</Text>
         </View>
       ) : (
         <FlatList
@@ -131,20 +242,26 @@ export default function RoutesScreen({ navigation }: any) {
           data={filtered}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          ListEmptyComponent={
+            <EmptyState
+              icon="bus-outline"
+              title={t.noRoutes ?? "No routes"}
+              subtitle={t.typeToSearch ?? "Try searching"}
+              cta={t.refresh}
+              onPress={load}
+            />
+          }
           renderItem={({ item }) => {
             const fav = favRouteIds.includes(item.id);
+            const title = `${fav ? "★ " : ""}${(item.shortName || "—").trim()}${item.longName ? ` • ${item.longName}` : ""}`;
+
             return (
-              <Pressable
+              <ListItem
                 onPress={() => navigation.navigate("Route", { routeId: item.id })}
-                style={{ padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
-              >
-                <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>
-                  {fav ? "★ " : ""}
-                  {(item.shortName || "—").trim()}
-                  {item.longName ? ` • ${item.longName}` : ""}
-                </Text>
-                <Text style={{ marginTop: 6, color: "rgba(255,255,255,0.65)" }}>Type: {item.type ?? "—"}</Text>
-              </Pressable>
+                title={title}
+                subtitle={`Type: ${item.type ?? "—"}`}
+                icon={fav ? "star" : "bus-outline"}
+              />
             );
           }}
         />

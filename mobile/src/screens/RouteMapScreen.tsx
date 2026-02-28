@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Polyline } from "react-native-maps";
+
 import { readCachedJson } from "../feed/FeedService";
 import type { Route, RouteTrips, ShapesById, Stop, StopTimesByTrip, Trip } from "../types/feed";
 import { useLang } from "../hooks/useLang";
 import { I18N } from "../i18n";
+
+import { UI } from "../ui/ui";
+import { TopBar, EmptyState } from "../ui/components";
 
 export default function RouteMapScreen({ route, navigation }: any) {
   const { lang } = useLang();
@@ -22,6 +26,9 @@ export default function RouteMapScreen({ route, navigation }: any) {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true);
+        setErr(null);
+
         const routes = await readCachedJson<Route[]>("routes.json");
         const trips = await readCachedJson<Trip[]>("trips.json");
         const routeTrips = await readCachedJson<RouteTrips>("route_trips.json");
@@ -36,6 +43,7 @@ export default function RouteMapScreen({ route, navigation }: any) {
           setErr(lang === "sq" ? "S’ka udhëtime për këtë linjë." : "No trips for this route.");
           return;
         }
+
         const trip = trips.find((tt) => tt.id === tripIds[0]) || null;
         if (!trip) {
           setErr(lang === "sq" ? "Udhëtimi mungon për këtë linjë." : "Trip missing for this route.");
@@ -83,25 +91,19 @@ export default function RouteMapScreen({ route, navigation }: any) {
   const initial = poly[0] || { latitude: 41.3275, longitude: 19.8187 };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
-      <View style={{ padding: 16 }}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Text style={{ color: "rgba(255,255,255,0.7)" }}>{t.back}</Text>
-        </Pressable>
-        <Text style={{ marginTop: 10, color: "white", fontSize: 18, fontWeight: "800" }}>{title}</Text>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: UI.bg0 }} edges={["top", "left", "right"]}>
+      <TopBar title={title} subtitle={t.map} leftLabel={t.back} onBack={() => navigation.goBack()} />
 
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator size="large" color="white" />
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={{ marginTop: 12, color: UI.muted, fontWeight: "900" }}>{t.loading}</Text>
         </View>
       ) : err ? (
-        <View style={{ padding: 16 }}>
-          <Text style={{ color: "rgba(255,255,255,0.8)" }}>{err}</Text>
-        </View>
+        <EmptyState icon="warning-outline" title={err} subtitle={lang === "sq" ? "Provo përsëri më vonë." : "Try again later."} />
       ) : (
         <MapView style={{ flex: 1 }} initialRegion={{ ...initial, latitudeDelta: 0.06, longitudeDelta: 0.06 }}>
-          <Polyline coordinates={poly} strokeWidth={4} />
+          <Polyline coordinates={poly} strokeWidth={4} strokeColor={UI.accent} />
           {markers.map((m) => (
             <Marker key={m.id} coordinate={{ latitude: m.lat, longitude: m.lon }} title={m.name} />
           ))}

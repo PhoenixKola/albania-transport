@@ -1,11 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+
 import { readCachedJson } from "../feed/FeedService";
 import type { Route, RouteTrips, Stop, StopTimesByTrip, Trip } from "../types/feed";
 import { getFavorites, toggleFavoriteRoute } from "../storage/favorites";
 import { useLang } from "../hooks/useLang";
 import { I18N } from "../i18n";
+
+import { UI } from "../ui/ui";
+import { AnimatedPressable } from "../ui/ui";
+import { TopBar, ListItem, EmptyState } from "../ui/components";
 
 export default function RouteScreen({ route, navigation }: any) {
   const { lang } = useLang();
@@ -31,6 +37,9 @@ export default function RouteScreen({ route, navigation }: any) {
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const routes = await readCachedJson<Route[]>("routes.json");
         const stops = await readCachedJson<Stop[]>("stops.json");
         const trips = await readCachedJson<Trip[]>("trips.json");
@@ -74,64 +83,66 @@ export default function RouteScreen({ route, navigation }: any) {
     return r.longName ? `${left} • ${r.longName}` : left;
   }, [r, t.route]);
 
+  const headerRight = (
+    <View style={{ flexDirection: "row", gap: 10 }}>
+      <AnimatedPressable
+        onPress={async () => {
+          const next = await toggleFavoriteRoute(routeId);
+          setIsFav(next.routes.includes(routeId));
+        }}
+        contentStyle={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          borderRadius: 16,
+          backgroundColor: UI.card2,
+          borderWidth: 1,
+          borderColor: UI.border
+        }}
+        scaleIn={0.98}
+      >
+        <Ionicons name={isFav ? "star" : "star-outline"} size={16} color={UI.text} />
+        <Text style={{ color: UI.text, fontWeight: "900" }}>{isFav ? t.favorited : t.favorite}</Text>
+      </AnimatedPressable>
+
+      <AnimatedPressable
+        onPress={() => navigation.navigate("RouteMap", { routeId })}
+        contentStyle={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          borderRadius: 16,
+          backgroundColor: UI.accent
+        }}
+        scaleIn={0.98}
+      >
+        <Ionicons name="map-outline" size={16} color="#fff" />
+        <Text style={{ color: "#fff", fontWeight: "900" }}>{t.map}</Text>
+      </AnimatedPressable>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
-      <View style={{ padding: 16 }}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Text style={{ color: "rgba(255,255,255,0.7)" }}>{t.back}</Text>
-        </Pressable>
+    <SafeAreaView style={{ flex: 1, backgroundColor: UI.bg0 }} edges={["top", "left", "right"]}>
+      <TopBar title={title} subtitle={trip?.headsign ? `${lang === "sq" ? "Destinacioni: " : "Headsign: "}${trip.headsign}` : undefined} leftLabel={t.back} onBack={() => navigation.goBack()} right={headerRight} />
 
-        <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>{title}</Text>
-
-        <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
-          <Pressable
-            onPress={async () => {
-              const next = await toggleFavoriteRoute(routeId);
-              setIsFav(next.routes.includes(routeId));
-            }}
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              borderRadius: 12,
-              backgroundColor: "rgba(255,255,255,0.10)",
-              borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.12)"
-            }}
-          >
-            <Text style={{ color: "white", fontWeight: "700" }}>{isFav ? t.favorited : t.favorite}</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => navigation.navigate("RouteMap", { routeId })}
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              borderRadius: 12,
-              backgroundColor: "rgba(59,130,246,0.9)"
-            }}
-          >
-            <Text style={{ color: "white", fontWeight: "700" }}>{t.map}</Text>
-          </Pressable>
+      <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <Ionicons name="location-outline" size={16} color={UI.muted2} />
+          <Text style={{ color: UI.muted, fontWeight: "900" }}>{t.stopsTitle}</Text>
         </View>
-
-        {trip?.headsign ? (
-          <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)" }}>
-            {lang === "sq" ? "Destinacioni: " : "Headsign: "}
-            {trip.headsign}
-          </Text>
-        ) : null}
-
-        <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)" }}>{t.stopsTitle}</Text>
       </View>
 
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator size="large" color="white" />
+          <ActivityIndicator size="large" color="#fff" />
         </View>
       ) : error ? (
-        <View style={{ padding: 16 }}>
-          <Text style={{ color: "rgba(255,255,255,0.8)" }}>{error}</Text>
-        </View>
+        <EmptyState icon="warning-outline" title={error} subtitle={lang === "sq" ? "Provo rifreskimin." : "Try refreshing."} cta={t.refresh} onPress={() => navigation.goBack()} />
       ) : (
         <FlatList
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
@@ -141,22 +152,12 @@ export default function RouteScreen({ route, navigation }: any) {
           renderItem={({ item, index }) => {
             const s = stopsMap[item];
             return (
-              <Pressable
+              <ListItem
                 onPress={() => navigation.navigate("Stop", { stopId: item })}
-                style={{
-                  padding: 14,
-                  borderRadius: 16,
-                  backgroundColor: "rgba(255,255,255,0.08)",
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.12)"
-                }}
-              >
-                <Text style={{ color: "rgba(255,255,255,0.65)", marginBottom: 6 }}>
-                  {lang === "sq" ? "Stacioni " : "Stop "}
-                  {index + 1}
-                </Text>
-                <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>{s?.name || item}</Text>
-              </Pressable>
+                title={s?.name || item}
+                subtitle={`${lang === "sq" ? "Stacioni " : "Stop "}${index + 1}`}
+                icon="pin-outline"
+              />
             );
           }}
         />

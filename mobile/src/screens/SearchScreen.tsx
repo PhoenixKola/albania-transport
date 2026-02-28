@@ -1,10 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+
 import { readCachedJson } from "../feed/FeedService";
 import type { Route, Stop } from "../types/feed";
 import { useLang } from "../hooks/useLang";
 import { I18N } from "../i18n";
+
+import { UI } from "../ui/ui";
+import { TopBar, ListItem, EmptyState, SearchInput } from "../ui/components";
 
 type Row =
   | { k: string; kind: "header"; title: string }
@@ -31,40 +36,25 @@ export default function SearchScreen({ navigation }: any) {
     if (!s) return [{ k: "h1", kind: "header", title: t.typeToSearch }];
 
     const routeHits = routes
-      .filter(r => `${r.shortName} ${r.longName}`.toLowerCase().includes(s))
+      .filter((r) => `${r.shortName} ${r.longName}`.toLowerCase().includes(s))
       .slice(0, 25);
 
-    const stopHits = stops
-      .filter(st => st.name.toLowerCase().includes(s))
-      .slice(0, 25);
+    const stopHits = stops.filter((st) => st.name.toLowerCase().includes(s)).slice(0, 25);
 
     return [
       { k: "hr", kind: "header", title: `${t.routesCount} (${routeHits.length})` },
-      ...routeHits.map(r => ({ k: `r:${r.id}`, kind: "route" as const, r })),
+      ...routeHits.map((r) => ({ k: `r:${r.id}`, kind: "route" as const, r })),
       { k: "hs", kind: "header", title: `${t.stopsCount} (${stopHits.length})` },
-      ...stopHits.map(st => ({ k: `s:${st.id}`, kind: "stop" as const, s: st }))
+      ...stopHits.map((st) => ({ k: `s:${st.id}`, kind: "stop" as const, s: st }))
     ];
   }, [q, routes, stops, t]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0b1220" }} edges={["top", "left", "right"]}>
-      <View style={{ padding: 16 }}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Text style={{ color: "rgba(255,255,255,0.7)" }}>{t.back}</Text>
-        </Pressable>
+    <SafeAreaView style={{ flex: 1, backgroundColor: UI.bg0 }} edges={["top", "left", "right"]}>
+      <TopBar title={t.search} subtitle={t.typeToSearch} leftLabel={t.back} onBack={() => navigation.goBack()} />
 
-        <Text style={{ marginTop: 10, color: "white", fontSize: 20, fontWeight: "800" }}>{t.search}</Text>
-
-        <View style={{ marginTop: 12, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}>
-          <TextInput
-            value={q}
-            onChangeText={setQ}
-            placeholder={`${t.search}…`}
-            placeholderTextColor="rgba(255,255,255,0.45)"
-            style={{ paddingHorizontal: 14, paddingVertical: 12, color: "white", fontSize: 16 }}
-            autoFocus
-          />
-        </View>
+      <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
+        <SearchInput value={q} onChangeText={setQ} placeholder={`${t.search}…`} autoFocus />
       </View>
 
       <FlatList
@@ -73,33 +63,32 @@ export default function SearchScreen({ navigation }: any) {
         keyExtractor={(x) => x.k}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => {
-          if (item.kind === "header") return <Text style={{ color: "rgba(255,255,255,0.65)" }}>{item.title}</Text>;
+          if (item.kind === "header") {
+            return (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8 }}>
+                <Ionicons name="information-circle-outline" size={16} color={UI.muted2} />
+                <Text style={{ color: UI.muted, fontWeight: "900" }}>{item.title}</Text>
+              </View>
+            );
+          }
 
           if (item.kind === "route") {
             const r = item.r;
             return (
-              <Pressable
+              <ListItem
                 onPress={() => navigation.navigate("Route", { routeId: r.id })}
-                style={{ padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
-              >
-                <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>
-                  {(r.shortName || "—").trim()}
-                  {r.longName ? ` • ${r.longName}` : ""}
-                </Text>
-              </Pressable>
+                title={`${(r.shortName || "—").trim()}${r.longName ? ` • ${r.longName}` : ""}`}
+                icon="bus-outline"
+              />
             );
           }
 
           const st = item.s;
-          return (
-            <Pressable
-              onPress={() => navigation.navigate("Stop", { stopId: st.id })}
-              style={{ padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", borderWidth: 1, borderColor: "rgba(255,255,255,0.12)" }}
-            >
-              <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>{st.name}</Text>
-            </Pressable>
-          );
+          return <ListItem onPress={() => navigation.navigate("Stop", { stopId: st.id })} title={st.name} icon="location-outline" />;
         }}
+        ListEmptyComponent={
+          <EmptyState icon="search" title={t.noResults ?? "No results"} subtitle={t.typeToSearch} />
+        }
       />
     </SafeAreaView>
   );

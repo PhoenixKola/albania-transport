@@ -12,6 +12,7 @@ import StopScreen from "./src/screens/StopScreen";
 import FavoritesScreen from "./src/screens/FavoritesScreen";
 import NearbyStopsScreen from "./src/screens/NearbyStopsScreen";
 import RouteMapScreen from "./src/screens/RouteMapScreen";
+import SourcesScreen from "./src/screens/SourcesScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ export default function App() {
           <Stack.Screen name="Favorites" component={FavoritesScreen} />
           <Stack.Screen name="Nearby" component={NearbyStopsScreen} />
           <Stack.Screen name="RouteMap" component={RouteMapScreen} />
+          <Stack.Screen name="Sources" component={SourcesScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

@@ -31,7 +31,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     locationDenied: "Location permission denied.",
     loading: "Loading…",
     route: "Route",
-    stop: "Stop"
+    stop: "Stop",
+    sources: "Sources"
   },
   sq: {
     appTitle: "Transport Tirana",
@@ -63,6 +64,7 @@ export const I18N: Record<Lang, Record<string, string>> = {
     locationDenied: "Leja e vendndodhjes u refuzua.",
     loading: "Po ngarkohet…",
     route: "Linja",
-    stop: "Stacion"
+    stop: "Stacion",
+    sources: "Burimet"
   }
 };

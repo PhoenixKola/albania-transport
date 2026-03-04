@@ -206,6 +206,26 @@ export default function RoutesScreen({ navigation }: any) {
               <Ionicons name="star" size={16} color={UI.text} />
               <Text style={{ color: UI.text, fontWeight: "900" }}>{t.favorites}</Text>
             </AnimatedPressable>
+
+            <AnimatedPressable
+              onPress={() => navigation.navigate("Sources")}
+              style={{}}
+              contentStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 16,
+                backgroundColor: UI.card2,
+                borderWidth: 1,
+                borderColor: UI.border
+              }}
+              scaleIn={0.98}
+            >
+              <Ionicons name="information-circle-outline" size={16} color={UI.text} />
+              <Text style={{ color: UI.text, fontWeight: "900" }}>{t.sources}</Text>
+            </AnimatedPressable>
           </View>
 
           <SearchInput value={q} onChangeText={setQ} placeholder={t.searchRoutes} />

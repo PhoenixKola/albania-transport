@@ -1,56 +1,86 @@
 import React from "react";
 import { Linking, Pressable, ScrollView, Text, View } from "react-native";
-import { DATA_SOURCES } from "../utils/sources";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function SourcesScreen() {
+import { DATA_SOURCES } from "../utils/sources";
+import { UI } from "../ui/ui";
+import { TopBar } from "../ui/components";
+import type { Lang } from "../i18n";
+import { I18N } from "../i18n";
+
+export default function SourcesScreen({ navigation, route }: any) {
+  const lang: Lang = route.params?.lang || "en";
+  const t = I18N[lang];
+
   const open = (url: string) => Linking.openURL(url);
 
+  const disclaimer = lang === "sq" ? DATA_SOURCES.disclaimerSq : DATA_SOURCES.disclaimerEn;
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#0b1220" }}>
-      <View style={{ padding: 16, paddingTop: 24 }}>
-        <Text style={{ color: "rgba(255,255,255,0.92)", fontSize: 20, fontWeight: "700" }}>
-          Data sources
-        </Text>
-        <Text style={{ marginTop: 8, color: "rgba(255,255,255,0.65)", fontSize: 14, lineHeight: 20 }}>
-          {DATA_SOURCES.disclaimerEn}
-        </Text>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: UI.bg0 }} edges={["top", "left", "right"]}>
+      <TopBar title={t.sources} subtitle={t.sourcesSubtitle} leftLabel={t.back} onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 12 }}>
         <View
           style={{
-            backgroundColor: "rgba(255,255,255,0.06)",
+            padding: 14,
+            borderRadius: 18,
+            backgroundColor: UI.card2,
             borderWidth: 1,
-            borderColor: "rgba(255,255,255,0.12)",
-            borderRadius: 14,
-            padding: 14
+            borderColor: UI.border
           }}
         >
-          <Text style={{ color: "rgba(255,255,255,0.92)", fontSize: 16, fontWeight: "600" }}>
-            GTFS feed (routes, stops, shapes)
-          </Text>
-          <Pressable onPress={() => open(DATA_SOURCES.gtfsZip)} style={{ marginTop: 8 }}>
-            <Text style={{ color: "rgba(59,130,246,1)", fontSize: 14 }}>{DATA_SOURCES.gtfsZip}</Text>
-          </Pressable>
+          <Text style={{ color: UI.text, fontWeight: "900", fontSize: 16 }}>{t.disclaimer}</Text>
+          <Text style={{ marginTop: 8, color: UI.muted, lineHeight: 20 }}>{disclaimer}</Text>
         </View>
 
-        <View
+        <Pressable
+          onPress={() => open(DATA_SOURCES.gtfsZip)}
           style={{
-            backgroundColor: "rgba(255,255,255,0.06)",
+            padding: 14,
+            borderRadius: 18,
+            backgroundColor: UI.card2,
             borderWidth: 1,
-            borderColor: "rgba(255,255,255,0.12)",
-            borderRadius: 14,
-            padding: 14
+            borderColor: UI.border
           }}
         >
-          <Text style={{ color: "rgba(255,255,255,0.92)", fontSize: 16, fontWeight: "600" }}>
-            Public transport info portal
-          </Text>
-          <Pressable onPress={() => open(DATA_SOURCES.portal)} style={{ marginTop: 8 }}>
-            <Text style={{ color: "rgba(59,130,246,1)", fontSize: 14 }}>{DATA_SOURCES.portal}</Text>
-          </Pressable>
-        </View>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: UI.text, fontWeight: "900", fontSize: 16 }}>
+                {lang === "sq" ? "Feed GTFS" : "GTFS feed"}
+              </Text>
+              <Text style={{ marginTop: 6, color: UI.muted }} numberOfLines={1}>
+                {DATA_SOURCES.gtfsZip}
+              </Text>
+            </View>
+            <Ionicons name="open-outline" size={18} color={UI.text} />
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => open(DATA_SOURCES.portal)}
+          style={{
+            padding: 14,
+            borderRadius: 18,
+            backgroundColor: UI.card2,
+            borderWidth: 1,
+            borderColor: UI.border
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: UI.text, fontWeight: "900", fontSize: 16 }}>
+                {lang === "sq" ? "Portali i transportit publik" : "Public transport portal"}
+              </Text>
+              <Text style={{ marginTop: 6, color: UI.muted }} numberOfLines={1}>
+                {DATA_SOURCES.portal}
+              </Text>
+            </View>
+            <Ionicons name="open-outline" size={18} color={UI.text} />
+          </View>
+        </Pressable>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

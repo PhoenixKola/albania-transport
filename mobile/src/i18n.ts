@@ -32,7 +32,9 @@ export const I18N: Record<Lang, Record<string, string>> = {
     loading: "Loading…",
     route: "Route",
     stop: "Stop",
-    sources: "Sources"
+    sources: "Sources",
+    sourcesSubtitle: "Official links used by the app",
+    disclaimer: "Disclaimer"
   },
   sq: {
     appTitle: "Transport Tirana",
@@ -65,6 +67,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     loading: "Po ngarkohet…",
     route: "Linja",
     stop: "Stacion",
-    sources: "Burimet"
+    sources: "Burimet",
+    sourcesSubtitle: "Linke zyrtare qe perdor aplikacioni",
+    disclaimer: "Deklarate",
   }
 };

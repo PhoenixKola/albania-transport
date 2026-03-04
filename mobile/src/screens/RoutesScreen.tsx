@@ -208,7 +208,7 @@ export default function RoutesScreen({ navigation }: any) {
             </AnimatedPressable>
 
             <AnimatedPressable
-              onPress={() => navigation.navigate("Sources")}
+              onPress={() => navigation.navigate("Sources", { lang })}
               style={{}}
               contentStyle={{
                 flexDirection: "row",

@@ -1,0 +1,158 @@
+[
+  {
+    "id": "15",
+    "shortName": "10A",
+    "longName": "Materniteti i ri – Qendër",
+    "type": 3
+  },
+  {
+    "id": "16",
+    "shortName": "10B",
+    "longName": "Mihal Grameno – Qendër",
+    "type": 3
+  },
+  {
+    "id": "17",
+    "shortName": "10C",
+    "longName": "Rrethrrotullimi Shkozë – Ish-fusha e aviacionit",
+    "type": 3
+  },
+  {
+    "id": "18",
+    "shortName": "11",
+    "longName": "Porcelan – Qendër",
+    "type": 3
+  },
+  {
+    "id": "19",
+    "shortName": "12",
+    "longName": "Uzina Dinamo – Sharrë",
+    "type": 3
+  },
+  {
+    "id": "46",
+    "shortName": "13A",
+    "longName": "Tirana e re Orar",
+    "type": 3
+  },
+  {
+    "id": "20",
+    "shortName": "13B",
+    "longName": "Tirana e re Antiorar",
+    "type": 3
+  },
+  {
+    "id": "22",
+    "shortName": "15A",
+    "longName": "Kombinat – Kinostudio",
+    "type": 3
+  },
+  {
+    "id": "23",
+    "shortName": "15B",
+    "longName": "Kombinat – Tufinë",
+    "type": 3
+  },
+  {
+    "id": "45",
+    "shortName": "16A",
+    "longName": "Linja e gjelbër Orar",
+    "type": 3
+  },
+  {
+    "id": "24",
+    "shortName": "16B",
+    "longName": "Linja e gjelbër Antiorar",
+    "type": 3
+  },
+  {
+    "id": "1",
+    "shortName": "1A",
+    "longName": "Selitë – Allias",
+    "type": 3
+  },
+  {
+    "id": "48",
+    "shortName": "1B",
+    "longName": "Kodra e Diellit – Allias",
+    "type": 3
+  },
+  {
+    "id": "2",
+    "shortName": "2",
+    "longName": "Terminali Juglindor",
+    "type": 3
+  },
+  {
+    "id": "3",
+    "shortName": "3A",
+    "longName": "Kashar Orar",
+    "type": 3
+  },
+  {
+    "id": "4",
+    "shortName": "3B",
+    "longName": "Kashar Antiorar",
+    "type": 3
+  },
+  {
+    "id": "47",
+    "shortName": "3C",
+    "longName": "Yrshek – Qendër",
+    "type": 3
+  },
+  {
+    "id": "5",
+    "shortName": "4",
+    "longName": "City Park – Qendër",
+    "type": 3
+  },
+  {
+    "id": "6",
+    "shortName": "5A",
+    "longName": "Uzina Autotraktori – Qendër",
+    "type": 3
+  },
+  {
+    "id": "7",
+    "shortName": "5B",
+    "longName": "Institut – Qendër",
+    "type": 3
+  },
+  {
+    "id": "8",
+    "shortName": "6",
+    "longName": "Laprakë – Qendër",
+    "type": 3
+  },
+  {
+    "id": "10",
+    "shortName": "8A",
+    "longName": "Terminali Juglindor - Qendër",
+    "type": 3
+  },
+  {
+    "id": "11",
+    "shortName": "8B",
+    "longName": "Sanatorium – Qendër",
+    "type": 3
+  },
+  {
+    "id": "12",
+    "shortName": "8C",
+    "longName": "Sauk i vjetër – Qendër",
+    "type": 3
+  },
+  {
+    "id": "13",
+    "shortName": "9A",
+    "longName": "Qytet Studenti – Jordan Misja",
+    "type": 3
+  },
+  {
+    "id": "14",
+    "shortName": "9B",
+    "longName": "Vilat gjermane – Jordan Misja",
+    "type": 3
+  }
+]

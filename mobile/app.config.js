@@ -2,7 +2,7 @@ module.exports = ({ config }) => ({
   ...config,
   name: "Tirana Transport",
   slug: "tirana-transport",
-  version: "1.0.4",
+  version: "1.0.5",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -21,7 +21,7 @@ module.exports = ({ config }) => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.phoenixkola.tiranatransport",
-    versionCode: 5,
+    versionCode: 6,
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#ffffff"

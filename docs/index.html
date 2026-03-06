@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tirana Transport — Sources</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; line-height: 1.5; }
+      .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 12px 0; }
+      a { word-break: break-all; }
+      code { background: #f6f6f6; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1>Tirana Transport — Sources</h1>
+
+    <div class="card">
+      <h2>Disclaimer</h2>
+      <p>
+        This is an independent app and is not affiliated with, endorsed by, or an official product of the Municipality of Tirana or any government entity.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Official sources</h2>
+      <ul>
+        <li>
+          Municipality of Tirana (urban lines info):
+          <a href="https://tirana.al/pikat-e-interesit/linjat-urbane">https://tirana.al/pikat-e-interesit/linjat-urbane</a>
+        </li>
+        <li>
+          Urbani public transport portal:
+          <a href="https://urbani.tirana.al/en">https://urbani.tirana.al/en</a>
+        </li>
+        <li>
+          GTFS dataset (official download):
+          <a href="https://pt.tirana.al/gtfs/gtfs.zip">https://pt.tirana.al/gtfs/gtfs.zip</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>App data (derived JSON)</h2>
+      <p>
+        The app may use processed JSON generated from the GTFS dataset for performance/offline caching.
+        These files are rebuilt automatically.
+      </p>
+      <ul>
+        <li><a href="./latest.json">latest.json</a></li>
+        <li><a href="./routes.json">routes.json</a></li>
+        <li><a href="./stops.json">stops.json</a></li>
+        <li><a href="./trips.json">trips.json</a></li>
+        <li><a href="./stop_times_by_trip.json">stop_times_by_trip.json</a></li>
+        <li><a href="./stop_times_by_stop.json">stop_times_by_stop.json</a></li>
+        <li><a href="./services.json">services.json</a></li>
+        <li><a href="./shapes.json">shapes.json</a></li>
+      </ul>
+      <p><small>Last build time is stored in <code>latest.json</code>.</small></p>
+    </div>
+  </body>
+</html>

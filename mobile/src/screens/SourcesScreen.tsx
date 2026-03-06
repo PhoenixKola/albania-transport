@@ -60,10 +60,8 @@ export default function SourcesScreen({ navigation, route }: any) {
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ color: UI.text, fontWeight: "900", fontSize: 16 }}>{title}</Text>
-          {subtitle ? (
-            <Text style={{ marginTop: 6, color: UI.muted }}>{subtitle}</Text>
-          ) : null}
-          <Text style={{ marginTop: subtitle ? 6 : 6, color: UI.muted }} numberOfLines={1}>
+          {subtitle ? <Text style={{ marginTop: 6, color: UI.muted }}>{subtitle}</Text> : null}
+          <Text style={{ marginTop: 6, color: UI.muted }} numberOfLines={1}>
             {url}
           </Text>
         </View>
@@ -100,6 +98,12 @@ export default function SourcesScreen({ navigation, route }: any) {
           title={lang === "sq" ? "Portali i transportit publik" : "Public transport portal"}
           subtitle={lang === "sq" ? "Burim zyrtar (faqe web)" : "Official source (web page)"}
           url={DATA_SOURCES.portal}
+        />
+
+        <Card
+          title={lang === "sq" ? "Burimet & te dhenat (faqe)" : "Sources & data (page)"}
+          subtitle={lang === "sq" ? "Faqe shpjeguese per burimet" : "Readable page listing sources"}
+          url={DATA_SOURCES.sourcesPage}
         />
 
         <Card

@@ -26,11 +26,55 @@ function sha256(buf: Buffer) {
   return crypto.createHash("sha256").update(buf).digest("hex");
 }
 
-async function download(url: string): Promise<Buffer> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Download failed: ${res.status} ${res.statusText}`);
-  const arr = await res.arrayBuffer();
-  return Buffer.from(arr);
+async function sleep(ms: number) {
+  await new Promise((r) => setTimeout(r, ms));
+}
+
+async function downloadWithRetry(
+  url: string,
+  {
+    retries = 6,
+    timeoutMs = 90_000,
+    backoffMs = 7_000
+  }: { retries?: number; timeoutMs?: number; backoffMs?: number } = {}
+): Promise<Buffer> {
+  let lastErr: any;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, {
+        signal: ctrl.signal,
+        headers: {
+          "user-agent": "albania-transport-ingest/1.0 (github-actions)"
+        }
+      });
+
+      if (!res.ok) {
+        const msg = `Download failed: ${res.status} ${res.statusText || ""}`.trim();
+        throw new Error(msg);
+      }
+
+      const arr = await res.arrayBuffer();
+      return Buffer.from(arr);
+    } catch (e: any) {
+      lastErr = e;
+      const isLast = attempt === retries;
+      console.warn(`[download] attempt ${attempt}/${retries} failed: ${e?.message || e}`);
+
+      if (isLast) break;
+
+      const wait = backoffMs * attempt;
+      console.warn(`[download] retrying in ${Math.round(wait / 1000)}s...`);
+      await sleep(wait);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  throw lastErr ?? new Error("Download failed after retries");
 }
 
 function readJson<T>(filePath: string, fallback: T): T {
@@ -73,7 +117,14 @@ async function main() {
   ensureDir(DATA_DIR);
   ensureDir(TMP_DIR);
 
-  const zipBuf = await download(GTFS_URL);
+  let zipBuf: Buffer;
+  try {
+    zipBuf = await downloadWithRetry(GTFS_URL, { retries: 6, timeoutMs: 90_000, backoffMs: 7_000 });
+  } catch (e: any) {
+    console.warn("GTFS download unavailable; keeping existing data. Reason:", e?.message || e);
+    return;
+  }
+
   const hash = `sha256:${sha256(zipBuf)}`;
 
   const prevLatest = readJson<Latest | null>(path.join(DATA_DIR, "latest.json"), null);
@@ -206,10 +257,11 @@ async function main() {
     if (!shapeId || !Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(seq)) continue;
     (shapesById[shapeId] ||= []).push([seq, lat, lon] as any);
   }
+
   for (const k of Object.keys(shapesById)) {
     const pts = shapesById[k] as any[];
     pts.sort((a, b) => a[0] - b[0]);
-    shapesById[k] = pts.map(p => [p[1], p[2]]);
+    shapesById[k] = pts.map((p) => [p[1], p[2]]);
     if (!shapesById[k].length) delete shapesById[k];
   }
 

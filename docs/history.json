@@ -1,5 +1,17 @@
 [
   {
+    "updatedAt": "2026-03-28T05:47:21.572Z",
+    "hash": "sha256:8623ea5713136b4130a632b7e7986af43ecdbdbd755fd04c6d06102b62931df4",
+    "counts": {
+      "routes": 26,
+      "stops": 467,
+      "trips": 16560,
+      "tripsWithStopTimes": 16560,
+      "stopsWithTimes": 467,
+      "shapes": 46
+    }
+  },
+  {
     "updatedAt": "2026-03-21T05:34:13.544Z",
     "hash": "sha256:9d56d2aae87b45aeb191820475106d593aa6937c5a6a621d6aadffc20b90e805",
     "counts": {

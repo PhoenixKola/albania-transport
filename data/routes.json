@@ -24,9 +24,15 @@
     "type": 3
   },
   {
-    "id": "19",
-    "shortName": "12",
+    "id": "71",
+    "shortName": "12A",
     "longName": "Uzina Dinamo – Sharrë",
+    "type": 3
+  },
+  {
+    "id": "72",
+    "shortName": "12B",
+    "longName": "Uzina Dinamo – 5 Maji",
     "type": 3
   },
   {
@@ -120,9 +126,9 @@
     "type": 3
   },
   {
-    "id": "8",
+    "id": "70",
     "shortName": "6",
-    "longName": "Laprakë – Qendër",
+    "longName": "Lapraka",
     "type": 3
   },
   {

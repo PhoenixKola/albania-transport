@@ -34,8 +34,19 @@ async function writeMeta(meta: Meta) {
   await FileSystem.writeAsStringAsync(META_PATH, JSON.stringify(meta));
 }
 
+async function fetchWithTimeout(url: string, timeoutMs: number, init?: RequestInit) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function downloadJson(url: string, localPath: string) {
-  const res = await fetch(url, { cache: "no-store" as any });
+  const res = await fetchWithTimeout(url, 10000, { cache: "no-store" as any });
   if (!res.ok) throw new Error(`Fetch failed ${res.status}: ${url}`);
   const txt = await res.text();
   await FileSystem.writeAsStringAsync(localPath, txt);
@@ -53,7 +64,9 @@ export async function syncFeed(): Promise<{ latest: Latest; updated: boolean; mo
 
   let latest: Latest | null = null;
   try {
-    const latestRes = await fetch(`${FEED_BASE_URL}/latest.json?t=${Date.now()}`, { cache: "no-store" as any });
+    const latestRes = await fetchWithTimeout(`${FEED_BASE_URL}/latest.json?t=${Date.now()}`, 10000, {
+      cache: "no-store" as any
+    });
     if (!latestRes.ok) throw new Error(`Failed latest.json: ${latestRes.status}`);
     latest = (await latestRes.json()) as Latest;
   } catch {

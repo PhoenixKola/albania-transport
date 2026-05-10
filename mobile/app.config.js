@@ -2,7 +2,7 @@ module.exports = ({ config }) => ({
   ...config,
   name: "Tirana Transport",
   slug: "tirana-transport",
-  version: "1.0.5",
+  version: "1.0.7",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -21,16 +21,13 @@ module.exports = ({ config }) => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.phoenixkola.tiranatransport",
-    versionCode: 6,
+    versionCode: 7,
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#ffffff"
     },
     config: {
-      ...(config.android?.config ?? {}),
-      googleMaps: {
-        apiKey: process.env.GOOGLE_MAPS_API_KEY
-      }
+      ...(config.android?.config ?? {})
     }
   },
   extra: {

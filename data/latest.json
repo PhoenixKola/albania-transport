@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-04-05T06:07:25.911Z",
+  "updatedAt": "2026-05-13T07:43:23.921Z",
   "source": "https://pt.tirana.al/gtfs/gtfs.zip",
-  "hash": "sha256:e5855e9d53d74832ba6e912e8195ae91a9985cbc641bdc3dcaf476c518763d14",
+  "hash": "sha256:c6264ab959b72f30ffa71a0053aca49a45bf193fe1535200c22a7889c379dd14",
   "files": {
     "routes": "routes.json",
     "stops": "stops.json",

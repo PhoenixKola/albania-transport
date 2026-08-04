@@ -181,150 +181,6 @@
       "endDate": "20260831"
     },
     {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": true,
-      "sunday": false,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": false,
-      "sunday": true,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": true,
-      "sunday": true,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-monday",
-      "monday": true,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": false,
-      "sunday": false,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "monday": true,
-      "tuesday": true,
-      "wednesday": true,
-      "thursday": true,
-      "friday": true,
-      "saturday": false,
-      "sunday": false,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-saturday",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": true,
-      "sunday": false,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-sunday",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": false,
-      "sunday": true,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-tuesday_to_friday",
-      "monday": false,
-      "tuesday": true,
-      "wednesday": true,
-      "thursday": true,
-      "friday": true,
-      "saturday": false,
-      "sunday": false,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-before-summer-weekend",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": true,
-      "sunday": true,
-      "startDate": "20260101",
-      "endDate": "20260630"
-    },
-    {
-      "serviceId": "2026-july-holiday_saturday",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": true,
-      "sunday": false,
-      "startDate": "20260701",
-      "endDate": "20260731"
-    },
-    {
-      "serviceId": "2026-july-normal",
-      "monday": true,
-      "tuesday": true,
-      "wednesday": true,
-      "thursday": true,
-      "friday": true,
-      "saturday": false,
-      "sunday": false,
-      "startDate": "20260701",
-      "endDate": "20260731"
-    },
-    {
-      "serviceId": "2026-july-sunday",
-      "monday": false,
-      "tuesday": false,
-      "wednesday": false,
-      "thursday": false,
-      "friday": false,
-      "saturday": false,
-      "sunday": true,
-      "startDate": "20260701",
-      "endDate": "20260731"
-    },
-    {
       "serviceId": "2026-summer-all",
       "monday": true,
       "tuesday": true,
@@ -501,151 +357,6 @@
       "exceptionType": 1
     },
     {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260101",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260102",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260316",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260320",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260323",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260406",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260413",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260501",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_saturday",
-      "date": "20260527",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260101",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260102",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260316",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260320",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260323",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260406",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260413",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260501",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_sunday",
-      "date": "20260527",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260101",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260102",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260316",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260320",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260323",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260406",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260413",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260501",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-holiday_weekend",
-      "date": "20260527",
-      "exceptionType": 1
-    },
-    {
-      "serviceId": "2026-before-summer-tuesday_to_friday",
-      "date": "20260101",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260101",
-      "exceptionType": 2
-    },
-    {
       "serviceId": "2026-all-normal",
       "date": "20260101",
       "exceptionType": 2
@@ -653,16 +364,6 @@
     {
       "serviceId": "2026-all-all",
       "date": "20260101",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-tuesday_to_friday",
-      "date": "20260102",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260102",
       "exceptionType": 2
     },
     {
@@ -676,16 +377,6 @@
       "exceptionType": 2
     },
     {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260316",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-monday",
-      "date": "20260316",
-      "exceptionType": 2
-    },
-    {
       "serviceId": "2026-all-normal",
       "date": "20260316",
       "exceptionType": 2
@@ -693,16 +384,6 @@
     {
       "serviceId": "2026-all-all",
       "date": "20260316",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-tuesday_to_friday",
-      "date": "20260320",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260320",
       "exceptionType": 2
     },
     {
@@ -716,16 +397,6 @@
       "exceptionType": 2
     },
     {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260323",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-monday",
-      "date": "20260323",
-      "exceptionType": 2
-    },
-    {
       "serviceId": "2026-all-normal",
       "date": "20260323",
       "exceptionType": 2
@@ -733,16 +404,6 @@
     {
       "serviceId": "2026-all-all",
       "date": "20260323",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260406",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-monday",
-      "date": "20260406",
       "exceptionType": 2
     },
     {
@@ -756,16 +417,6 @@
       "exceptionType": 2
     },
     {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260413",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-monday",
-      "date": "20260413",
-      "exceptionType": 2
-    },
-    {
       "serviceId": "2026-all-normal",
       "date": "20260413",
       "exceptionType": 2
@@ -776,16 +427,6 @@
       "exceptionType": 2
     },
     {
-      "serviceId": "2026-before-summer-tuesday_to_friday",
-      "date": "20260501",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260501",
-      "exceptionType": 2
-    },
-    {
       "serviceId": "2026-all-normal",
       "date": "20260501",
       "exceptionType": 2
@@ -793,16 +434,6 @@
     {
       "serviceId": "2026-all-all",
       "date": "20260501",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-tuesday_to_friday",
-      "date": "20260527",
-      "exceptionType": 2
-    },
-    {
-      "serviceId": "2026-before-summer-normal",
-      "date": "20260527",
       "exceptionType": 2
     },
     {

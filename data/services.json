@@ -237,6 +237,36 @@
       "exceptionType": 1
     },
     {
+      "serviceId": "2026-after-summer-weekend",
+      "date": "20260907",
+      "exceptionType": 1
+    },
+    {
+      "serviceId": "2026-after-summer-weekend",
+      "date": "20261123",
+      "exceptionType": 1
+    },
+    {
+      "serviceId": "2026-after-summer-weekend",
+      "date": "20261130",
+      "exceptionType": 1
+    },
+    {
+      "serviceId": "2026-after-summer-weekend",
+      "date": "20261201",
+      "exceptionType": 1
+    },
+    {
+      "serviceId": "2026-after-summer-weekend",
+      "date": "20261208",
+      "exceptionType": 1
+    },
+    {
+      "serviceId": "2026-after-summer-weekend",
+      "date": "20261225",
+      "exceptionType": 1
+    },
+    {
       "serviceId": "2026-all-normal",
       "date": "20260101",
       "exceptionType": 2
